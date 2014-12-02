@@ -1,10 +1,7 @@
-package AynchGHSSimulator;
+package AsynchGHSSimulator;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * Created by priyanka on 11/25/14.
@@ -15,22 +12,26 @@ public class Edge {
   int cost;
   int inTransit;
   boolean isBranch;
+  String type;
   LinkedList aQueue, bQueue;
 
   Edge(Node a, Node b) {
     edgeID = MSTviewer.edgeCount++;
     this.a = a;
     this.b = b;
+    this.cost = a.UID + b.UID;
     a.getNeighbors().put(b,this);
     b.getNeighbors().put(a,this);
     aQueue = new LinkedList(); // ensures FIFO delivery from a to b
     bQueue = new LinkedList(); // ensures FIFO delivery from b to a
+    System.out.println(" Edge between " + a.UID + " and " + b.UID);
   }
 
   int getCost() { // use Euclidian distance, with unique low order bits
     return this.a.UID + this.b.UID;
   }
 
+  // Messages sent over an edge are forwarded to their destinations
   void forwardMessage(final Node src,
                       final Node dest,
                       final Message m) {
@@ -52,34 +53,36 @@ public class Edge {
     switch (m.messageType) {
       case Message.REJECT:
         if (!isBranch)
-          this.setForeground(TRANSLUCENT_GRAY);
-        break;
+          break;
       case Message.CONNECT:
-        this.setForeground(Color.white); this.repaint();
+        this.isBranch = true;
         break;
       case Message.INITIATE:
       case Message.INFORM:
         isBranch = true;
-        this.setForeground(Color.red); this.repaint();
         dest.level = m.level;
         dest.core = m.core;
-        dest.updateLabel();
     }
-    (new Thread() {
-      public void run() { // animation from src to dest, then delivery
-        if (getDelay() > 0) {
-          try {
-            Thread.sleep(getDelay()*20*priorCount);
-          } catch (InterruptedException ie) {}
-        }
-        Message toDeliver;
+    //(new Thread() {
+    //public void run() { // animation from src to dest, then delivery
+//        if (getDelay() > 0) {
+//          try {
+//            Thread.sleep(getDelay()*20*priorCount);
+//          } catch (InterruptedException ie) {}
+//        }
+    Message toDeliver;
         synchronized (messageQueue) {
           toDeliver = (Message)  messageQueue.removeFirst(); //dequeue
         }
         dest.sendMessage(toDeliver); // message is delivered here
         inTransit--;
-      }
-    }).start();
+    //}
+    //}).start();
+  }
+
+  public int getDelay() {
+    int randomInt = new Random().nextInt(100);
+    return randomInt;
   }
 
   public String toString() {
