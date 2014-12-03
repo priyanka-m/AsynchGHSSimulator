@@ -1,7 +1,9 @@
-package AynchGHSSimulator;
+package AsynchGHSSimulator;
 
-
-public final class Message {
+/**
+ * Created by priyanka on 11/25/14.
+ */
+public final class Message implements java.io.Serializable {
   // Message Type options
   public static final int REGISTRATION = 0;
   public static final int WAKEUP = 1;
@@ -34,20 +36,13 @@ public final class Message {
   public int core;        //Node ID of sender's fragment core (not always used)
   public int level;       //Node ID of sender's level (not always used)
   public int cost;        //MWOE cost in sender's subtree (not always used)
-  public Object serverData; // used in registration messages
+  public Object data; // used in registration messages
 
-  // Constructor for REGISTRATION messages...
-  // When sent to server:
-  //     destination should be 0
-  //     serverData should be a String (your name)
-  // When sent from server:
-  //     destination will be your node's ID
-  //     serverData will be a TreeMap of edge costs to node IDs,
-  //        where both costs and IDs are stored as Integer objects
-  public Message(int destination, Object serverData) {
+  // Sending a copy of edges to all nodes
+  public Message(int destination, Object Data) {
     messageType = REGISTRATION;
     this.destination = destination;
-    this.serverData = serverData;
+    this.data = Data;
   }
 
   // Constructor for Initiate, Test, Connect, and Inform messages:
@@ -98,11 +93,12 @@ public final class Message {
       case INFORM:
         result += core + "," + level; break;
       case REGISTRATION:
-        result += serverData;
+        result += data;
     }
     result += ")";
     return result;
   }
 
 } // Message
+
 

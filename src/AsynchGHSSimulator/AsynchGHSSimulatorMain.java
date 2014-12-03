@@ -1,4 +1,4 @@
-package AynchGHSSimulator;
+package AsynchGHSSimulator;
 
 /**
  * Created by priyanka on 11/14/14.
