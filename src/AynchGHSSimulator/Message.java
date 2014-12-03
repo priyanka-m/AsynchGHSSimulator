@@ -93,7 +93,7 @@ public final class Message implements java.io.Serializable {
       case INFORM:
         result += core + "," + level; break;
       case REGISTRATION:
-        result += serverData;
+        result += data;
     }
     result += ")";
     return result;

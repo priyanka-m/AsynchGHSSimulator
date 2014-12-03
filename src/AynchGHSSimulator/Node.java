@@ -36,7 +36,7 @@ public class Node implements Runnable {
 
   public void run() {
     try {
-      receiveMessages();
+//      receiveMessages();
     } catch (Exception e) {
       closeConnection(e);
     }
@@ -44,7 +44,7 @@ public class Node implements Runnable {
 
   synchronized void sendMessage(Message m) {
     try {
-      oos.writeObject(m);
+ //     oos.writeObject(m);
       System.out.println("delivered " + m);
     } catch (Exception e) {
       closeConnection(e);
@@ -66,15 +66,15 @@ public class Node implements Runnable {
     }).start();
   }
 
-  void receiveMessages() {
+/*  void receiveMessages() {
     try {
       while (true) {
         Message m = (Message) ois.readObject();
         switch (m.messageType) {
           case Message.REGISTRATION:
-            name = (String) m.serverData;
+  //          name = (String) m.serverData;
             updateLabel();
-            setToolTipText("node " + UID + ": " + name);
+     //       setToolTipText("node " + UID + ": " + name);
             break;
           case Message.WAKEUP:
             closeConnection("node sent Wakeup message");
@@ -92,9 +92,12 @@ public class Node implements Runnable {
     } catch (Exception e) {
       closeConnection(e);
     }
+  } */
+  void updateLabel(){
+      
   }
 
-  void forwardMessage(Message m) {
+/*  void forwardMessage(Message m) {
     if (m.destination == UID)
       sendMessage(m);
     else {
@@ -102,16 +105,16 @@ public class Node implements Runnable {
       Edge e = (Edge) neighbors.get(n);
       e.forwardMessage(this,n,m);
     }
-  }
+  } */
 
   void closeConnection(Object reason) {
-    this.setEnabled(false);
+//    this.setEnabled(false);
     if (!terminated) { // print only if not terminated yet
       System.out.println("Closing socket to " + name + " due to: " + reason);
       if (reason instanceof Exception)
         ((Exception) reason).printStackTrace();
     }
-    try {socket.close();} catch (Exception se) {}
+//    try {socket.close();} catch (Exception se) {}
     terminated = true;
   }
 }

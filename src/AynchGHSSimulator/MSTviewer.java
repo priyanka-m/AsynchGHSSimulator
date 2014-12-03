@@ -78,10 +78,10 @@ public class MSTviewer implements Runnable {
       try {
         acceptRegistration();
         createEdges();
-        sendEdges();
-        waitForTermination();
+   //     sendEdges();
+//        waitForTermination();
       } catch (Exception e) {
-        System.out.println(" stopped ");
+        System.out.println(" stopped "+ e);
         e.printStackTrace();
       }
     }
@@ -134,23 +134,24 @@ public class MSTviewer implements Runnable {
     }
   }
 
-  void waitForTermination() {
+  /*void waitForTermination() {
     while (isStarted())
       synchronized(endButton) {
         try {endButton.wait();} catch (InterruptedException ie) {}
       }
     System.out.println("\n SESSION TERMINATED BY USER \n");
-  }
+  }*/
 
   public static void main(String[] args) {
     int[] arrayIds = null;
 
     try{
-      StreamTokenizer tokenizer = new StreamTokenizer(new FileReader("Input-File.txt"));
+      StreamTokenizer tokenizer = new StreamTokenizer(new FileReader("Inputs.txt"));
       tokenizer.slashSlashComments(true);
       tokenizer.eolIsSignificant(false);
       tokenizer.nextToken();
       nodeCount = (int)tokenizer.nval;
+      System.out.println("Node Count::"+nodeCount);
       arrayIds = new int[nodeCount];
       connections = new int[nodeCount][nodeCount];
 
@@ -158,6 +159,7 @@ public class MSTviewer implements Runnable {
         tokenizer.nextToken();
         if (tokenizer.ttype == StreamTokenizer.TT_NUMBER){
           arrayIds[i] = (int)tokenizer.nval;
+          System.out.println("Array ID "+(i+1)+"::"+arrayIds[i]);
         }
       }
       for(int i=0;i<nodeCount;i++){

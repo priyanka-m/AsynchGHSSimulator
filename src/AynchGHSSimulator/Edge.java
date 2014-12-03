@@ -1,9 +1,6 @@
 package AynchGHSSimulator;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
 /**
@@ -52,15 +49,15 @@ public class Edge {
     switch (m.messageType) {
       case Message.REJECT:
         if (!isBranch)
-          this.setForeground(TRANSLUCENT_GRAY);
+   //       this.setForeground(TRANSLUCENT_GRAY);
         break;
       case Message.CONNECT:
-        this.setForeground(Color.white); this.repaint();
+ //       this.setForeground(Color.white); this.repaint();
         break;
       case Message.INITIATE:
       case Message.INFORM:
         isBranch = true;
-        this.setForeground(Color.red); this.repaint();
+ //       this.setForeground(Color.red); this.repaint();
         dest.level = m.level;
         dest.core = m.core;
         dest.updateLabel();
@@ -84,5 +81,8 @@ public class Edge {
 
   public String toString() {
     return "edge (" + a.UID + "," + b.UID + ")";
+  }
+  int getDelay(){
+     return 0; 
   }
 }
