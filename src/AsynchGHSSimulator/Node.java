@@ -154,12 +154,25 @@ public class Node implements Runnable {
       for (int i=0;i<deferredMsgs.size();i++){
         m = (Message) deferredMsgs.poll();
         if (this.core == m.core){
-            rejectMessage(this.UID,m.sender,new Message(Message.REJECT,this.UID,m.sender));
+            if(receivedConnectFrom.contains(m.sender)){  
+                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT,this.UID,m.sender));
+                deferredMsgs.remove(m);
+            }
+        
+     //       rejectMessage(this.UID,m.sender,new Message(Message.REJECT,this.UID,m.sender));
         }
         else if (this.level >= level){
-            acceptMessage(this,m.sender,new Message(Message.ACCEPT,this.UID,m.sender));
+            if (neighbors.get(this).getCost() < mwoe){
+        //      minChild = null;
+                mwoe = neighbors.get(this).getCost();
+                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT,this.UID,m.sender));
+                deferredMsgs.remove(m);
+            }
+     
+      //      acceptMessage(this,m.sender,new Message(Message.ACCEPT,this.UID,m.sender));
         }
       }
+  }
  //   for each message M in deferredTests
  //   if (this.core == M.core)
  //     send "Reject" to M's sender
@@ -167,18 +180,19 @@ public class Node implements Runnable {
  //   else if (this.level >= level)
  //     send "Accept" to M's sender
  //   remove M from deferredTests
-  }
-  void rejectMessage(int src, int dest, final Message m){
-      if(receivedConnectFrom.contains(dest))
-        deferredMsgs.remove(m);
-  }
-  void acceptMessage(Node src, int dest, final Message m){
-      if (neighbors.get(src).getCost() < mwoe){
-  //      minChild = null;
-        mwoe = neighbors.get(src).getCost();
-      }
-     deferredMsgs.remove(m);
-  }
+  
+//  void rejectMessage(int src, int dest, final Message m){
+//      if(receivedConnectFrom.contains(dest))
+//        deferredMsgs.remove(m);
+//  }
+//  void acceptMessage(Node src, int dest, final Message m){
+//      if (neighbors.get(src).getCost() < mwoe){
+//  //      minChild = null;
+//        mwoe = neighbors.get(src).getCost();
+//
+//      }
+//     deferredMsgs.remove(m);
+//  }
   void forwardMessage(Message m) {
     if (m.destination == UID)
       sendMessage(m);
