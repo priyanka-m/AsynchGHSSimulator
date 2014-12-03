@@ -12,6 +12,7 @@ public class Node implements Runnable {
   String name;
   int level;
   int core;
+  int mwoe;
   String status = null;
   Map<Node, Edge> neighbors; // maps neighboring nodes to edges
   boolean terminated;
@@ -148,16 +149,36 @@ public class Node implements Runnable {
     //}
   }
 
-//  void processDeferredTests() {
-//    for each message M in deferredTests
-//    if (this.core == M.core)
-//      send "Reject" to M's sender
-//    remove M from deferredTests
-//    else if (this.level >= level)
-//      send "Accept" to M's sender
-//    remove M from deferredTests
-//  }
-
+  void processDeferredTests() {
+      Message m;
+      for (int i=0;i<deferredMsgs.size();i++){
+        m = (Message) deferredMsgs.poll();
+        if (this.core == m.core){
+            rejectMessage(this.UID,m.sender,new Message(Message.REJECT,this.UID,m.sender));
+        }
+        else if (this.level >= level){
+            acceptMessage(this,m.sender,new Message(Message.ACCEPT,this.UID,m.sender));
+        }
+      }
+ //   for each message M in deferredTests
+ //   if (this.core == M.core)
+ //     send "Reject" to M's sender
+  //  remove M from deferredTests
+ //   else if (this.level >= level)
+ //     send "Accept" to M's sender
+ //   remove M from deferredTests
+  }
+  void rejectMessage(int src, int dest, final Message m){
+      if(receivedConnectFrom.contains(dest))
+        deferredMsgs.remove(m);
+  }
+  void acceptMessage(Node src, int dest, final Message m){
+      if (neighbors.get(src).getCost() < mwoe){
+  //      minChild = null;
+        mwoe = neighbors.get(src).getCost();
+      }
+     deferredMsgs.remove(m);
+  }
   void forwardMessage(Message m) {
     if (m.destination == UID)
       sendMessage(m);

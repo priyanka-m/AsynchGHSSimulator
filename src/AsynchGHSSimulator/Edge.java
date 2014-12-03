@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 /**
- * Created by priyanka on 11/25/14.
+ * Created on 11/25/14.
  */
 public class Edge {
   Node a, b;
@@ -14,7 +14,8 @@ public class Edge {
   boolean isBranch;
   String type;
   LinkedList aQueue, bQueue;
-
+  boolean isRejected;
+  
   Edge(Node a, Node b) {
     edgeID = MSTviewer.edgeCount++;
     this.a = a;
@@ -25,6 +26,8 @@ public class Edge {
     aQueue = new LinkedList(); // ensures FIFO delivery from a to b
     bQueue = new LinkedList(); // ensures FIFO delivery from b to a
     System.out.println(" Edge between " + a.UID + " and " + b.UID);
+    isBranch = false;
+    isRejected = false;
   }
 
   int getCost() { // use Euclidian distance, with unique low order bits
@@ -75,7 +78,7 @@ public class Edge {
           toDeliver = (Message)  messageQueue.removeFirst(); //dequeue
         }
         dest.sendMessage(toDeliver); // message is delivered here
-        inTransit--;
+    //    inTransit--;
     //}
     //}).start();
   }
