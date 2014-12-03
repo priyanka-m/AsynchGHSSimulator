@@ -107,7 +107,12 @@ public class Node implements Runnable {
           case Message.INITIATE:
           case Message.CONNECT:
             if (m.sender != UID && m.destination == UID) {
-              connect(m.sender, m.destination, m.core, m.level);
+              receivedConnectFrom.add(m.sender);
+              if (sentConnectTo.contains(m.sender) && receivedConnectFrom.contains(m.destination)) {
+                connect(m.sender, m.destination, m.core, m.level);
+              } else {
+                deferredMsgs.add(m);
+              }
             } else {
               forwardMessage(m);
             }
@@ -126,14 +131,32 @@ public class Node implements Runnable {
   }
 
   void connect(int src, int dest, int core, int level) {
-    receivedConnectFrom.add(dest);
-    if (sentConnectTo.contains(src) && receivedConnectFrom.contains(dest)) {
-      this.core = Math.max(src, dest);
-      this.level++;
-      //if (this.core == UID) // WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
-      //send Initiate(this.core,this.level) to self // start broadcast
-    }
+    //if (this.level > level) {// *** ABSORB THE OTHER FRAGMENT ***
+    //if (status == FOUND)  // MWOE can't be in the absorbed fragment
+    //send Inform(core,level) over E
+    //if (status == SEARCHING) {// MWOE might be in the absorbed fragment
+    //add E to waitingForReport
+    //send Initiate(core,level) over E
+    //}
+    //} else {// levels are the same, so *** MERGE WITH THE OTHER FRAGMENT ***
+    // may be SLEEPING or may have sent Connect on E
+    this.core = Math.max(src, dest);
+    this.level++;
+    processDeferredTests();
+    //if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
+    //send Initiate(this.core,this.level) to self // start broadcast
+    //}
   }
+
+//  void processDeferredTests() {
+//    for each message M in deferredTests
+//    if (this.core == M.core)
+//      send "Reject" to M's sender
+//    remove M from deferredTests
+//    else if (this.level >= level)
+//      send "Accept" to M's sender
+//    remove M from deferredTests
+//  }
 
   void forwardMessage(Message m) {
     if (m.destination == UID)
