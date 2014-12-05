@@ -14,12 +14,18 @@ public class Node implements Runnable {
   int core;
   int mwoe;
   String status = null;
+  Node parent = null;
+  Node minChild = null;
+  Edge MWOE = null;
   Map<Node, Edge> neighbors; // maps neighboring nodes to edges
   boolean terminated;
   BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(1000, true);
   BlockingQueue<Message> deferredMsgs = new ArrayBlockingQueue<Message>(1000, true);
   List<Integer> receivedConnectFrom = new ArrayList<Integer>();
   List<Integer> sentConnectTo = new ArrayList<Integer>();
+  ArrayList<Edge> branchEdges = new ArrayList<Edge>();
+  ArrayList<Edge> basicEdges = new ArrayList<Edge>();
+  ArrayList<Edge> rejectedEdges = new ArrayList<Edge>();
 
 
   Node(int UID) {
@@ -106,6 +112,7 @@ public class Node implements Runnable {
           //this.closeConnection("node sent Wakeup message");
           //break;
           case Message.INITIATE:
+            Initiate(m.sender, m.core, m.level);
           case Message.CONNECT:
             if (m.sender != UID && m.destination == UID) {
               receivedConnectFrom.add(m.sender);
@@ -131,6 +138,83 @@ public class Node implements Runnable {
     }
   }
 
+  Node findNodeIncidentOnEdge(Edge incidentEdge) {
+    for (Node n : neighbors.keySet()) {
+      if (neighbors.get(n).equals(incidentEdge))
+        return n;
+    }
+    return null;
+  }
+
+  Edge findLowestCostBasicEdge() {
+    int minCost = 100000;
+    Edge minCostEdge = null;
+    for (Edge e : basicEdges) {
+      if (e.cost < minCost)
+        minCost = e.cost;
+      minCostEdge = e;
+    }
+    return minCostEdge;
+  }
+
+  void Initiate(int sender, int core, int level) {
+    status = "SEARCHING";
+    this.core = core;
+    this.level = level;
+    processDeferredTests();
+    this.parent = (Node) MSTviewer.nodes.get(sender);
+    this.minChild = null;
+
+    ArrayList<Edge> waitingForReport = branchEdges;
+    //let waitingForReport contain all branch edges (besides E, if sender != self)
+    for (Edge e : branchEdges) {
+      Node neighbour = findNodeIncidentOnEdge(e);
+      if (neighbour != null)
+        e.forwardMessage(this, neighbour, new Message(Message.INITIATE, this.UID, findNodeIncidentOnEdge(e).UID, this.core, this.level));
+    }
+    //send "Initiate(core,level)" over all branch edges (besides E, sender != self)
+    MWOE.cost = 100000;
+    while (!basicEdges.isEmpty() && (MWOE == null || MWOE.cost > findLowestCostBasicEdge().cost)) {
+      Node neighbour = findNodeIncidentOnEdge(findLowestCostBasicEdge());
+      findLowestCostBasicEdge().forwardMessage(this, neighbour, new Message(Message.TEST, this.UID, neighbour.UID, this.core, this.level));
+      //wait for a response for the test message.
+      try {
+        Thread.sleep(1000);
+      } catch (Exception e) {
+        System.out.println(e);
+      }
+    }
+
+    if (waitingForReport.isEmpty()) {
+      if (parent != this) {
+        status = "FOUND";
+        waitingForReport.remove(core);  //     remove E from waitingForReport
+    if (MWOE.getCost() < mwoe)
+        minChild = findNodeIncidentOnEdge(MWOE);
+        mwoe = MWOE.getCost();
+   //     send "Report(mwoe)" to parent  // this will be the minimum in subtree
+      } else if (MWOE.getCost() != 100000){
+          status = "FOUND";
+            if (minChild != null){
+       //          send "ChangeRoot" to minChild
+            }
+            else{
+                Edge e = basicEdges.get(0);       //        move first basicEdge to branchEdge
+                branchEdges.add(e);
+                int receiver = findNodeIncidentOnEdge(e).UID;
+                connect(sender,receiver,core,level);//          send "Connect(core,level)" across that edge
+            } //      send "ChangeRoot" to self
+        }
+        else{ //     send "AllDone" on all branchEdges
+            for (Edge e : branchEdges) {
+            Node neighbour = findNodeIncidentOnEdge(e);
+            if (neighbour != null)
+                e.forwardMessage(this, neighbour, new Message(Message.ALL_DONE, this.UID, findNodeIncidentOnEdge(e).UID));
+            }
+        }
+    }
+  }
+
   void connect(int src, int dest, int core, int level) {
     //if (this.level > level) {// *** ABSORB THE OTHER FRAGMENT ***
     //if (status == FOUND)  // MWOE can't be in the absorbed fragment
@@ -144,12 +228,13 @@ public class Node implements Runnable {
     this.core = Math.max(src, dest);
     this.level++;
     processDeferredTests();
-    //if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
-    //send Initiate(this.core,this.level) to self // start broadcast
-    //}
+    if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
+      sendMessage(new Message(Message.INITIATE, this.UID, this.UID, this.core, this.level));// start broadcast
+    }
   }
 
   void processDeferredTests() {
+
       Message m;
       for (int i=0;i<deferredMsgs.size();i++){
         m = (Message) deferredMsgs.poll();
@@ -193,6 +278,17 @@ public class Node implements Runnable {
 //      }
 //     deferredMsgs.remove(m);
 //  }
+
+//    for each message M in deferredTests
+//    if (this.core == M.core)
+//      send "Reject" to M's sender
+//    remove M from deferredTests
+//    else if (this.level >= level)
+//      send "Accept" to M's sender
+//    remove M from deferredTests
+  
+
+
   void forwardMessage(Message m) {
     if (m.destination == UID)
       sendMessage(m);
@@ -212,3 +308,4 @@ public class Node implements Runnable {
     terminated = true;
   }
 }
+

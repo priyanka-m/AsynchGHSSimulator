@@ -23,6 +23,8 @@ public class Edge {
     this.cost = a.UID + b.UID;
     a.getNeighbors().put(b,this);
     b.getNeighbors().put(a,this);
+    a.basicEdges.add(this);
+    b.basicEdges.add(this);
     aQueue = new LinkedList(); // ensures FIFO delivery from a to b
     bQueue = new LinkedList(); // ensures FIFO delivery from b to a
     System.out.println(" Edge between " + a.UID + " and " + b.UID);
@@ -59,6 +61,10 @@ public class Edge {
           break;
       case Message.CONNECT:
         this.isBranch = true;
+        a.basicEdges.remove(this);
+        a.branchEdges.add(this);
+        b.basicEdges.remove(this);
+        b.branchEdges.add(this);
         break;
       case Message.INITIATE:
       case Message.INFORM:
