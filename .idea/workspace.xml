@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="09353d40-e0df-496c-87c3-7abacd7d441f" name="Default" comment="implemented node wake and intial connect&#10;">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java" afterPath="$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java" afterPath="$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -90,7 +89,7 @@
       <file leaf-file-name="Edge.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="65" column="28" selection-start="1792" selection-end="1792" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1530">
+            <state line="80" column="46" selection-start="2228" selection-end="2299" vertical-scroll-proportion="0.0" vertical-offset="1200" max-vertical-offset="1545">
               <folding />
             </state>
           </provider>
@@ -99,17 +98,9 @@
       <file leaf-file-name="Node.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="153" column="24" selection-start="4422" selection-end="4422" vertical-scroll-proportion="0.056603774" vertical-offset="2169" max-vertical-offset="3660">
+            <state line="225" column="41" selection-start="7307" selection-end="7349" vertical-scroll-proportion="1.350629" vertical-offset="2426" max-vertical-offset="3795">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#514#523#0" expanded="true" />
-                <element signature="e#599#608#0" expanded="true" />
-                <element signature="e#673#682#0" expanded="true" />
-                <element signature="e#731#740#0" expanded="true" />
-                <element signature="e#789#795#0" expanded="true" />
-                <element signature="e#843#849#0" expanded="true" />
-                <element signature="e#900#906#0" expanded="true" />
-                <element signature="e#1748#1766#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -118,7 +109,7 @@
       <file leaf-file-name="Message.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Message.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="48" column="27" selection-start="1542" selection-end="1542" vertical-scroll-proportion="0.0" vertical-offset="578" max-vertical-offset="1650">
+            <state line="59" column="42" selection-start="1894" selection-end="1959" vertical-scroll-proportion="0.0" vertical-offset="885" max-vertical-offset="1650">
               <folding />
             </state>
           </provider>
@@ -188,6 +179,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -254,7 +246,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -512,8 +503,8 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3402367" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Analyze Dataflow from" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32988167" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32988167" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -558,6 +549,80 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java">
       <provider selected="true" editor-type-id="text-editor">
+        <state line="80" column="46" selection-start="2228" selection-end="2299" vertical-scroll-proportion="0.0" vertical-offset="1200" max-vertical-offset="1545">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="225" column="41" selection-start="7307" selection-end="7349" vertical-scroll-proportion="0.0" vertical-offset="3375" max-vertical-offset="3855">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Message.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="59" column="42" selection-start="1894" selection-end="1959" vertical-scroll-proportion="0.0" vertical-offset="885" max-vertical-offset="1650">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/MSTviewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="81" column="46" selection-start="2217" selection-end="2217" vertical-scroll-proportion="0.0" vertical-offset="1215" max-vertical-offset="2310">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/input.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="9" selection-start="12" selection-end="61" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="180">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="65" column="28" selection-start="1792" selection-end="1792" vertical-scroll-proportion="0.0" vertical-offset="975" max-vertical-offset="1545">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="153" column="22" selection-start="4420" selection-end="4420" vertical-scroll-proportion="0.0" vertical-offset="2295" max-vertical-offset="3660">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Message.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="27" selection-start="1542" selection-end="1542" vertical-scroll-proportion="0.0" vertical-offset="578" max-vertical-offset="1650">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/MSTviewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="81" column="46" selection-start="2217" selection-end="2217" vertical-scroll-proportion="0.0" vertical-offset="1215" max-vertical-offset="2310">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/input.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="9" selection-start="12" selection-end="61" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="180">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java">
+      <provider selected="true" editor-type-id="text-editor">
         <state line="65" column="28" selection-start="1792" selection-end="1792" vertical-scroll-proportion="0.0" vertical-offset="975" max-vertical-offset="1545">
           <folding />
         </state>
@@ -568,14 +633,6 @@
         <state line="184" column="58" selection-start="5703" selection-end="5703" vertical-scroll-proportion="0.0" vertical-offset="2340" max-vertical-offset="3660">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -620,14 +677,6 @@
         <state line="64" column="56" selection-start="1647" selection-end="1647" vertical-scroll-proportion="0.0" vertical-offset="960" max-vertical-offset="1860">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -665,14 +714,6 @@
         <state line="25" column="42" selection-start="633" selection-end="633" vertical-scroll-proportion="0.0" vertical-offset="375" max-vertical-offset="1830">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -710,14 +751,6 @@
         <state line="108" column="31" selection-start="2446" selection-end="2505" vertical-scroll-proportion="0.0" vertical-offset="1196" max-vertical-offset="1845">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -755,14 +788,6 @@
         <state line="12" column="12" selection-start="230" selection-end="230" vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="2010">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -795,16 +820,12 @@
     </entry>
     <entry file="jar:///usr/lib/jvm/java-7-oracle/src.zip!/java/io/FileReader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="0" selection-start="1321" selection-end="1321" vertical-scroll-proportion="0.33168316" vertical-offset="376" max-vertical-offset="1020">
-          <folding />
-        </state>
+        <state line="57" column="0" selection-start="1321" selection-end="1321" vertical-scroll-proportion="0.33168316" vertical-offset="376" max-vertical-offset="1020" />
       </provider>
     </entry>
     <entry file="jar:///usr/lib/jvm/java-7-oracle/src.zip!/java/lang/Thread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="743" column="0" selection-start="27685" selection-end="27685" vertical-scroll-proportion="0.33168316" vertical-offset="10456" max-vertical-offset="30210">
-          <folding />
-        </state>
+        <state line="743" column="0" selection-start="27685" selection-end="27685" vertical-scroll-proportion="0.33168316" vertical-offset="10456" max-vertical-offset="30210" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/AsynchGHSSimulatorMain.java">
@@ -823,38 +844,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/MSTviewer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="81" column="46" selection-start="2217" selection-end="2217" vertical-scroll-proportion="0.0" vertical-offset="810" max-vertical-offset="2295">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Message.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="27" selection-start="1542" selection-end="1542" vertical-scroll-proportion="0.0" vertical-offset="578" max-vertical-offset="1650">
+        <state line="81" column="46" selection-start="2217" selection-end="2217" vertical-scroll-proportion="0.0" vertical-offset="1530" max-vertical-offset="2235">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Edge.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="65" column="28" selection-start="1792" selection-end="1792" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1530">
+        <state line="80" column="46" selection-start="2228" selection-end="2299" vertical-scroll-proportion="0.0" vertical-offset="701" max-vertical-offset="1530">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Message.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="59" column="42" selection-start="1894" selection-end="1959" vertical-scroll-proportion="0.0" vertical-offset="578" max-vertical-offset="1650">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AsynchGHSSimulator/Node.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="153" column="24" selection-start="4422" selection-end="4422" vertical-scroll-proportion="0.056603774" vertical-offset="2169" max-vertical-offset="3660">
+        <state line="225" column="41" selection-start="7307" selection-end="7349" vertical-scroll-proportion="1.350629" vertical-offset="2426" max-vertical-offset="3795">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#514#523#0" expanded="true" />
-            <element signature="e#599#608#0" expanded="true" />
-            <element signature="e#673#682#0" expanded="true" />
-            <element signature="e#731#740#0" expanded="true" />
-            <element signature="e#789#795#0" expanded="true" />
-            <element signature="e#843#849#0" expanded="true" />
-            <element signature="e#900#906#0" expanded="true" />
-            <element signature="e#1748#1766#0" expanded="true" />
           </folding>
         </state>
       </provider>

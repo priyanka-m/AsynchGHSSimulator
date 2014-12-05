@@ -112,6 +112,9 @@ public class Node implements Runnable {
           //break;
           case Message.INITIATE:
             Initiate(m.sender, m.core, m.level);
+            break;
+          case Message.TEST:
+            Test(m);
           case Message.CONNECT:
             if (m.sender != UID && m.destination == UID) {
               receivedConnectFrom.add(m.sender);
@@ -177,11 +180,8 @@ public class Node implements Runnable {
       Node neighbour = findNodeIncidentOnEdge(findLowestCostBasicEdge());
       findLowestCostBasicEdge().forwardMessage(this, neighbour, new Message(Message.TEST, this.UID, neighbour.UID, this.core, this.level));
       //wait for a response for the test message.
-      try {
-        Thread.sleep(1000);
-      } catch (Exception e) {
-        System.out.println(e);
-      }
+
+
     }
 
     if (waitingForReport.isEmpty()) {
@@ -193,6 +193,15 @@ public class Node implements Runnable {
       else
       send "AllDone" on all branchEdges
     }
+  }
+
+  void Test(Message m) {
+    if (this.core == m.core) // in the same fragment
+      neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT, UID, m.sender));
+    else if (this.level >= m.level) // can't be in the same fragment
+      neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT, UID, m.sender));
+    else // don't know yet because we haven't reached that level
+      deferredMsgs.add(m);
   }
 
   void connect(int src, int dest, int core, int level) {
