@@ -57,8 +57,10 @@ public class Edge {
     }
     switch (m.messageType) {
       case Message.REJECT:
-        if (!isBranch)
+        if (!isBranch){
+          isRejected = true;
           break;
+        }
       case Message.CONNECT:
         this.isBranch = true;
         a.basicEdges.remove(this);
@@ -67,6 +69,7 @@ public class Edge {
         b.branchEdges.add(this);
         break;
       case Message.INITIATE:
+      case Message.TEST:
       case Message.INFORM:
         isBranch = true;
         dest.level = m.level;
