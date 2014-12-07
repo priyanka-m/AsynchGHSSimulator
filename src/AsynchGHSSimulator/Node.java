@@ -226,12 +226,7 @@ public class Node implements Runnable {
       sendMessage(new Message(Message.INITIATE, this.UID, this.UID, this.core, this.level));// start broadcast
     }
   }
-void report(int cost){
-    this.waitingForReport.remove(MWOE);  //     remove E from waitingForReport
-        if (MWOE.getCost() < mwoe)
-        minChild = findNodeIncidentOnEdge(MWOE);
-        mwoe = MWOE.getCost();
-}
+
   void processDeferredTests() {
 
       Message m;
@@ -261,17 +256,7 @@ void report(int cost){
     }
  }
   
-  void rejectMessage(int src, int dest, final Message m){
-      if(receivedConnectFrom.contains(dest))
-        deferredMsgs.remove(m);
-  }
-  void acceptMessage(Node src, int dest, final Message m){
-      if (neighbors.get(src).getCost() < mwoe){
-        mwoe = neighbors.get(src).getCost();
-
-      }
-     deferredMsgs.remove(m);
-  }
+ 
   
   void allDone(){
       branchEdges.remove(MWOE);
