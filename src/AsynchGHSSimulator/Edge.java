@@ -60,13 +60,15 @@ public class Edge {
         isBranch = true;
         break;
       case Message.REJECT:
-        isRejected = true;
-        if (!isBranch)
+        if (!isBranch){
+          isRejected = true;
           break;
+        }
       case Message.CONNECT:
         this.isBranch = true;
         break;
       case Message.INITIATE:
+      case Message.TEST:
       case Message.INFORM:
         isBranch = true;
         dest.level = m.level;

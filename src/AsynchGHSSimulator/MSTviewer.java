@@ -1,5 +1,9 @@
 package AsynchGHSSimulator;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -8,8 +12,8 @@ public class MSTviewer implements Runnable {
   static final int MAX_NODES = 50; // limit on the number of nodes in graph
   boolean started; // true when the algorithm has been started up by user
   public static ArrayList<Node> nodes = new ArrayList<Node>();   // Node objects indexed by unique IDs
-  static int edgeCount = 0, nodeCount = 5;
-  static int[][] connections = {{0, 1, 1, 0, 0}, {1, 0, 1, 1, 0}, {1, 1, 0, 1, 1}, {0, 1, 1, 0, 1}, {0, 0, 1, 1, 0}};
+  static int edgeCount = 0, nodeCount ;
+  static int[][] connections ;//= {{0, 1, 1, 0, 0}, {1, 0, 1, 1, 0}, {1, 1, 0, 1, 1}, {0, 1, 1, 0, 1}, {0, 0, 1, 1, 0}};
   ;
 
   synchronized void setStarted(boolean b) {
@@ -111,37 +115,37 @@ public class MSTviewer implements Runnable {
 
   public static void main(String[] args) {
     int[] arrayIds = null;
-    // TODO: fix input file reading
-    //StreamTokenizer tokenizer = null;
 
-    //try{
-//      tokenizer = new StreamTokenizer(new FileReader("../data/input.txt"));
-//      tokenizer.slashSlashComments(true);
-//      tokenizer.eolIsSignificant(false);
-//      tokenizer.nextToken();
-//      nodeCount = (int)tokenizer.nval;
-//      arrayIds = new int[nodeCount];
-//      connections = new int[nodeCount][nodeCount];
-//
-//      for(int i=0;i<nodeCount;i++){
-//        tokenizer.nextToken();
-//        if (tokenizer.ttype == StreamTokenizer.TT_NUMBER){
-//          arrayIds[i] = (int)tokenizer.nval;
-//        }
-//      }
-//      for(int i=0;i<nodeCount;i++){
-//        for(int j=0;j<nodeCount;j++){
-//          tokenizer.nextToken();
-//          if (tokenizer.ttype == StreamTokenizer.TT_NUMBER){
-//            connections[i][j] = (int)tokenizer.nval;
-//          }
-//        }
-//      }
-//    }catch(FileNotFoundException e){
-//      System.out.println("Exception::" +e);
-//    } catch (IOException e2) {
-//      System.out.println("Exception::" +e2);
-//    }
+    StreamTokenizer tokenizer = null;
+
+    try{
+      tokenizer = new StreamTokenizer(new FileReader("input.txt"));
+      tokenizer.slashSlashComments(true);
+      tokenizer.eolIsSignificant(false);
+      tokenizer.nextToken();
+      nodeCount = (int)tokenizer.nval;
+      arrayIds = new int[nodeCount];
+      connections = new int[nodeCount][nodeCount];
+
+      for(int i=0;i<nodeCount;i++){
+        tokenizer.nextToken();
+        if (tokenizer.ttype == StreamTokenizer.TT_NUMBER){
+          arrayIds[i] = (int)tokenizer.nval;
+        }
+      }
+      for(int i=0;i<nodeCount;i++){
+        for(int j=0;j<nodeCount;j++){
+          tokenizer.nextToken();
+          if (tokenizer.ttype == StreamTokenizer.TT_NUMBER){
+            connections[i][j] = (int)tokenizer.nval;
+          }
+        }
+      }
+    }catch(FileNotFoundException e){
+      System.out.println("Exception::" +e);
+    } catch (IOException e2) {
+      System.out.println("Exception::" +e2);
+    }
     MSTviewer viewer = new MSTviewer();
     (new Thread(viewer)).start();
   }
