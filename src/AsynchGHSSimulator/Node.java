@@ -15,7 +15,7 @@ public class Node implements Runnable {
   int mwoe;
   String status = null;
   Node parent = null;
-  Node minChild = null;
+  Node minChild;
   Map<Node, Edge> neighbors; // maps neighboring nodes to edges
   boolean terminated;
   BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(1000, true);
@@ -119,6 +119,9 @@ public class Node implements Runnable {
             case Message.REPORT:
               Report(m.sender, m.cost);
               break;
+            case Message.CHANGE_ROOT:
+              changeRoot();
+              break;
             case Message.CONNECT:
               if (m.sender != UID && m.destination == UID) {
                 receivedConnectFrom.add(m.sender);
@@ -136,6 +139,7 @@ public class Node implements Runnable {
               level = m.level;
               core = m.core;
               // don't break
+              Inform(m.sender, m.core, m.level);
             default:
               forwardMessage(m);
           }
@@ -175,14 +179,15 @@ public class Node implements Runnable {
     this.parent = (Node) MSTviewer.nodes.get(sender);
     this.minChild = null;
 
+
     waitingForReport = branchEdges;
+    waitingForReport.remove(neighbors.get(MSTviewer.nodes.get(sender)));
     //let waitingForReport contain all branch edges (besides E, if sender != self)
     for (Edge e : branchEdges) {
       Node neighbour = findNodeIncidentOnEdge(e);
-      System.out.println(UID + " sending initiate to " + neighbour.UID);
-      System.out.println(UID + " sending initiate to " + neighbour.UID);
-      if (neighbour != null)
-        e.forwardMessage(this, neighbour, new Message(Message.INITIATE, this.UID, findNodeIncidentOnEdge(e).UID, this.core, this.level));
+      if (neighbour != null && neighbour != MSTviewer.nodes.get(sender))
+        System.out.println(UID + " sending initiate to " + neighbour.UID);
+      e.forwardMessage(this, neighbour, new Message(Message.INITIATE, this.UID, findNodeIncidentOnEdge(e).UID, this.core, this.level));
     }
     //send "Initiate(core,level)" over all branch edges (besides E, sender != self)
     //MWOE.cost =
@@ -194,17 +199,22 @@ public class Node implements Runnable {
       //wait for a response for the test message.
       while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {}
     }
-    if (waitingForReport.isEmpty()) {
-      if (parent != this) {
-        status = "FOUND";
-        parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
-      } else if (mwoe != 100000) {
-        sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
-      } else
-        for (Edge branchEdge : branchEdges) {
-          Node n = findNodeIncidentOnEdge(branchEdge);
-          branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
+
+    while (true) {
+      if (waitingForReport.isEmpty()) {
+        if (parent != this) {
+          status = "FOUND";
+          parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
+        } else if (mwoe != 100000) {
+          sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
+        } else {
+          for (Edge branchEdge : branchEdges) {
+            Node n = findNodeIncidentOnEdge(branchEdge);
+            branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
+          }
         }
+        break;
+      }
     }
   }
 
@@ -233,109 +243,78 @@ public class Node implements Runnable {
 
   void Report(int sender, int cost) {
     waitingForReport.remove(neighbors.get(MSTviewer.nodes.get(sender)));
-    if (cost < mwoe)
+    if (cost < mwoe) {
       minChild = MSTviewer.nodes.get(sender);
       mwoe = cost;
+    }
   }
 
+  void changeRoot() {
+    status = "FOUND";
+    if (minChild != null)
+      neighbors.get(minChild).forwardMessage(this, minChild, new Message(Message.CHANGE_ROOT, this.UID, minChild.UID));
+    else{
+      Edge e = findLowestCostBasicEdge();
+      Node n = findNodeIncidentOnEdge(e);
+      branchEdges.add(e);
+      e.forwardMessage(this, n, new Message(Message.CONNECT, UID, n.UID, core, level));
+    }
+  }
   synchronized void connect(int src, int dest, int core, int level) {
     System.out.println("connect called");
-    branchEdges.add(neighbors.get(dest));
-    basicEdges.remove(neighbors.get(dest));
-    //if (this.level > level) {// *** ABSORB THE OTHER FRAGMENT ***
-    //if (status == FOUND)  // MWOE can't be in the absorbed fragment
-    //send Inform(core,level) over E
-    //if (status == SEARCHING) {// MWOE might be in the absorbed fragment
-    //add E to waitingForReport
-    //send Initiate(core,level) over E
-    //}
-    //} else {// levels are the same, so *** MERGE WITH THE OTHER FRAGMENT ***
-    // may be SLEEPING or may have sent Connect on E
-    this.core = Math.max(src, dest);
-    System.out.println("core is " + this.core);
-    this.level++;
-    //processDeferredTests();
-    if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
-      System.out.println("new leader is " + this.core);
-      sendMessage(new Message(Message.INITIATE, this.UID, this.UID, this.core, this.level));// start broadcast
+    branchEdges.add(neighbors.get(MSTviewer.nodes.get(src)));
+    basicEdges.remove(neighbors.get(MSTviewer.nodes.get(src)));
+    if (this.level > level) {// *** ABSORB THE OTHER FRAGMENT ***
+      if (status.equals("FOUND"))  // MWOE can't be in the absorbed fragment
+        neighbors.get(MSTviewer.nodes.get(src)).forwardMessage(this, MSTviewer.nodes.get(src), new Message(Message.INFORM, dest, src, core, level));
+      if (status.equals("SEARCHING")) {// MWOE might be in the absorbed fragment
+        waitingForReport.add(neighbors.get(MSTviewer.nodes.get(src)));
+        neighbors.get(MSTviewer.nodes.get(src)).forwardMessage(this, MSTviewer.nodes.get(src), new Message(Message.INITIATE, UID, MSTviewer.nodes.get(src).UID, core, level));
+      }
+    } else {// levels are the same, so *** MERGE WITH THE OTHER FRAGMENT ***
+      this.core = Math.max(src, dest);
+      System.out.println("core is " + this.core);
+      this.level++;
+      processDeferredTests();
+      if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
+        System.out.println("new leader is " + this.core);
+        sendMessage(new Message(Message.INITIATE, this.UID, this.UID, this.core, this.level));// start broadcast
+      }
     }
   }
 
-//  void processDeferredTests() {
-//
-//      Message m;
-//      for (int i=0;i<deferredMsgs.size();i++){
-//        m = (Message) deferredMsgs.poll();
-//        if (this.core == m.core){
-//<<<<<<< HEAD
-//            if(receivedConnectFrom.contains(m.sender)){
-//                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT,this.UID,m.sender));
-//                deferredMsgs.remove(m);
-//            }
-//
-//     //       rejectMessage(this.UID,m.sender,new Message(Message.REJECT,this.UID,m.sender));
-//        }
-//        else if (this.level >= level){
-//            if (neighbors.get(this).getCost() < mwoe){
-//        //      minChild = null;
-//                mwoe = neighbors.get(this).getCost();
-//                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT,this.UID,m.sender));
-//                deferredMsgs.remove(m);
-//            }
-//
-//      //      acceptMessage(this,m.sender,new Message(Message.ACCEPT,this.UID,m.sender));
-//        }
-//      }
-//=======
-//
-//                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT,this.UID,m.sender));
-//                deferredMsgs.remove(m);
-//
-//        }
-//        else if (this.level >= level){
-//                neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT,this.UID,m.sender));
-//                deferredMsgs.remove(m);
-//        }
-//      }
-//  }
-  
-  void changeRoot(){
-  status = "FOUND";
-  if (minChild != null)
-     neighbors.get(minChild).forwardMessage(this, minChild, new Message(Message.CHANGE_ROOT, this.UID, minChild.UID)); 
-  else{
-      Edge firstBasicEdge = basicEdges.get(0);
-      branchEdges.add(firstBasicEdge);
-      firstBasicEdge.forwardMessage(this, findNodeIncidentOnEdge(firstBasicEdge), new Message(Message.CONNECT, UID, findNodeIncidentOnEdge(firstBasicEdge).UID, core, level));
+  void Inform(int sender, int core,int level){
+    this.core = core;
+    this.level = level;
+    processDeferredTests();
+    for (Edge e : branchEdges) {
+      Node neighbour = findNodeIncidentOnEdge(e);
+      if (neighbour != null && neighbour != MSTviewer.nodes.get(sender)) {
+        e.forwardMessage(this, neighbour, new Message(Message.INFORM, this.UID, neighbour.UID, this.core, this.level));
+      }
     }
- }
-  
- 
-  
-//  void allDone(){
-//      branchEdges.remove(MWOE);
-//      branchEdgesWithoutMWOE = branchEdges;
-//
-//      for (Edge e : branchEdgesWithoutMWOE) {
-//            Node neighbour = findNodeIncidentOnEdge(e);
-//            if (neighbour != null)
-//                e.forwardMessage(this, neighbour, new Message(Message.ALL_DONE, this.UID, findNodeIncidentOnEdge(e).UID));
-//            }
-//  }
+    //   send "Inform(core,level)" over all other branch edges (besides E)
+  }
 
-//    void inform(int core,int level){
-//    this.core = core;
-//    this.level = level;
-//    processDeferredTests();
-//    branchEdges.remove(MWOE);
-//    branchEdgesWithoutMWOE = branchEdges;
-//    for (Edge e : branchEdgesWithoutMWOE) {
-//    Node neighbour = findNodeIncidentOnEdge(e);
-//    if (neighbour != null)
-//    e.forwardMessage(this, neighbour, new Message(Message.INFORM, this.UID, findNodeIncidentOnEdge(e).UID,this.core,this.level));
-//    }
-//    //   send "Inform(core,level)" over all other branch edges (besides E)
-//    }
+  void allDone(int sender) {
+    for (Edge e : branchEdges) {
+      Node neighbour = findNodeIncidentOnEdge(e);
+      if (neighbour != null && neighbour != MSTviewer.nodes.get(sender))
+          e.forwardMessage(this, neighbour, new Message(Message.ALL_DONE, UID, neighbour.UID));
+    }
+  }
+
+  void processDeferredTests() {
+    for (Message m :  deferredMsgs) {
+      if (this.core == m.core) {
+        MSTviewer.nodes.get(m.sender).sendMessage(new Message(Message.REJECT, UID, m.sender));
+        deferredMsgs.remove(m);
+      } else if (this.level >= m.level) {
+        MSTviewer.nodes.get(m.sender).sendMessage(new Message(Message.ACCEPT, UID, m.sender));
+        deferredMsgs.remove(m);
+      }
+    }
+  }
 
   void forwardMessage(Message m) {
     if (m.destination == UID)
