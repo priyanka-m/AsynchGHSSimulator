@@ -96,6 +96,7 @@ public class Edge {
     return randomInt;
   }
 
+  @Override
   public String toString() {
     return "edge (" + a.UID + "," + b.UID + ")";
   }
