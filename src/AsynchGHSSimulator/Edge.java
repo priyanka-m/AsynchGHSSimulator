@@ -27,7 +27,6 @@ public class Edge {
     b.basicEdges.add(this);
     aQueue = new LinkedList(); // ensures FIFO delivery from a to b
     bQueue = new LinkedList(); // ensures FIFO delivery from b to a
-    System.out.println(" Edge between " + a.UID + " and " + b.UID);
     isBranch = false;
     isRejected = false;
   }
@@ -62,33 +61,36 @@ public class Edge {
       case Message.REJECT:
         if (!isBranch){
           isRejected = true;
-          break;
         }
+        break;
       case Message.CONNECT:
-        this.isBranch = true;
+        //this.isBranch = true;
         break;
       case Message.INITIATE:
+        break;
       case Message.TEST:
+        break;
       case Message.INFORM:
         isBranch = true;
         dest.level = m.level;
         dest.core = m.core;
+
     }
-    //(new Thread() {
-    //public void run() { // animation from src to dest, then delivery
-//        if (getDelay() > 0) {
-//          try {
-//            Thread.sleep(getDelay()*20*priorCount);
-//          } catch (InterruptedException ie) {}
-//        }
-    Message toDeliver;
+    (new Thread() {
+      public void run() { // animation from src to dest, then delivery
+        if (getDelay() > 0) {
+          try {
+            Thread.sleep(getDelay()*20*priorCount);
+          } catch (InterruptedException ie) {}
+        }
+        Message toDeliver;
         synchronized (messageQueue) {
           toDeliver = (Message)  messageQueue.removeFirst(); //dequeue
         }
         dest.sendMessage(toDeliver); // message is delivered here
     //    inTransit--;
-    //}
-    //}).start();
+      }
+    }).start();
   }
 
   public int getDelay() {

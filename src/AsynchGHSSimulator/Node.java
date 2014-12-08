@@ -13,7 +13,7 @@ public class Node implements Runnable {
   int level;
   int core;
   int mwoe;
-  String status = null;
+  String status = "sleeping";
   Node parent = null;
   Node minChild;
   Map<Node, Edge> neighbors; // maps neighboring nodes to edges
@@ -32,7 +32,6 @@ public class Node implements Runnable {
 
   Node(int UID) {
     this.UID = UID;
-    System.out.print(this.UID);
     this.core = UID;
     this.name = "?";
     this.level = 0;
@@ -100,9 +99,8 @@ public class Node implements Runnable {
             case Message.WAKEUP:
               Node minWeightNeighbour = findMinWeightNeighbour();
               if (!sentConnectTo.contains(minWeightNeighbour.UID)) {
+                System.out.println("sent connect to of " + UID + " contains " + minWeightNeighbour.UID + " sending connect from " + UID + " to " + minWeightNeighbour + " core " + core + " level " + level);
                 neighbors.get(minWeightNeighbour).forwardMessage(this, minWeightNeighbour, new Message(Message.CONNECT, UID, minWeightNeighbour.UID, core, level));
-                this.sentConnectTo.add(minWeightNeighbour.UID);
-                System.out.println("sent connect to of " + UID + " contains " + minWeightNeighbour.UID);
               }
               break;
             case Message.INITIATE:
@@ -110,6 +108,7 @@ public class Node implements Runnable {
               break;
             case Message.TEST:
               Test(m);
+              break;
             case Message.ACCEPT:
               Accept(m.sender);
               break;
@@ -123,12 +122,14 @@ public class Node implements Runnable {
               changeRoot();
               break;
             case Message.CONNECT:
+              System.out.println("connect received " + m.sender + m.destination);
               if (m.sender != UID && m.destination == UID) {
+                MSTviewer.nodes.get(m.sender).sentConnectTo.add(UID);
                 receivedConnectFrom.add(m.sender);
                 if (sentConnectTo.contains(m.sender) && receivedConnectFrom.contains(m.sender)) {
-                  System.out.println("connect received " + m.sender + m.destination);
                   connect(m.sender, m.destination, m.core, m.level);
                 } else {
+                  System.out.println("adding msg from " + m.sender + " to " + m.destination + " to deffered msgs ");
                   deferredMsgs.add(m);
                 }
               } else {
@@ -175,7 +176,7 @@ public class Node implements Runnable {
     status = "SEARCHING";
     this.core = core;
     this.level = level;
-    //processDeferredTests();
+    processDeferredTests();
     this.parent = (Node) MSTviewer.nodes.get(sender);
     this.minChild = null;
 
@@ -185,9 +186,10 @@ public class Node implements Runnable {
     //let waitingForReport contain all branch edges (besides E, if sender != self)
     for (Edge e : branchEdges) {
       Node neighbour = findNodeIncidentOnEdge(e);
-      if (neighbour != null && neighbour != MSTviewer.nodes.get(sender))
+      if (neighbour != null && neighbour != MSTviewer.nodes.get(sender)) {
         System.out.println(UID + " sending initiate to " + neighbour.UID);
-      e.forwardMessage(this, neighbour, new Message(Message.INITIATE, this.UID, findNodeIncidentOnEdge(e).UID, this.core, this.level));
+        e.forwardMessage(this, neighbour, new Message(Message.INITIATE, this.UID, neighbour.UID, this.core, this.level));
+      }
     }
     //send "Initiate(core,level)" over all branch edges (besides E, sender != self)
     //MWOE.cost =
@@ -220,10 +222,12 @@ public class Node implements Runnable {
 
   void Test(Message m) {
     if (this.core == m.core) {// in the same fragment
+      System.out.println(" in the same fragment ");
       neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT, UID, m.sender));
       rejectedEdges.add(neighbors.get(MSTviewer.nodes.get(m.sender)));
     } else if (this.level >= m.level) {// can't be in the same fragment
       neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT, UID, m.sender));
+      System.out.println(" not in the same fragment ");
     } else // don't know yet because we haven't reached that level
       deferredMsgs.add(m);
   }
@@ -260,11 +264,13 @@ public class Node implements Runnable {
       e.forwardMessage(this, n, new Message(Message.CONNECT, UID, n.UID, core, level));
     }
   }
-  synchronized void connect(int src, int dest, int core, int level) {
+
+  void connect(int src, int dest, int core, int level) {
     System.out.println("connect called");
     branchEdges.add(neighbors.get(MSTviewer.nodes.get(src)));
     basicEdges.remove(neighbors.get(MSTviewer.nodes.get(src)));
     if (this.level > level) {// *** ABSORB THE OTHER FRAGMENT ***
+      System.out.println("checking leve diff btwn " + src + " and " + dest);
       if (status.equals("FOUND"))  // MWOE can't be in the absorbed fragment
         neighbors.get(MSTviewer.nodes.get(src)).forwardMessage(this, MSTviewer.nodes.get(src), new Message(Message.INFORM, dest, src, core, level));
       if (status.equals("SEARCHING")) {// MWOE might be in the absorbed fragment
@@ -273,7 +279,7 @@ public class Node implements Runnable {
       }
     } else {// levels are the same, so *** MERGE WITH THE OTHER FRAGMENT ***
       this.core = Math.max(src, dest);
-      System.out.println("core is " + this.core);
+      System.out.println("core is " + this.core + " increasing level of " + UID);
       this.level++;
       processDeferredTests();
       if (this.core == this.UID) {// WE'RE THE NEW ROOT, SO START THE MWOE SEARCH
@@ -307,9 +313,11 @@ public class Node implements Runnable {
   void processDeferredTests() {
     for (Message m :  deferredMsgs) {
       if (this.core == m.core) {
+        System.out.println("rejecting msg from " + m.sender + " to " + m.destination);
         MSTviewer.nodes.get(m.sender).sendMessage(new Message(Message.REJECT, UID, m.sender));
         deferredMsgs.remove(m);
       } else if (this.level >= m.level) {
+        System.out.println("accepting msg from " + m.sender + " to " + m.destination);
         MSTviewer.nodes.get(m.sender).sendMessage(new Message(Message.ACCEPT, UID, m.sender));
         deferredMsgs.remove(m);
       }

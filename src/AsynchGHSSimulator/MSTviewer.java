@@ -94,17 +94,6 @@ public class MSTviewer implements Runnable {
     }
   }
 
-  // Sends a copy of all edges to all nodes.
-  void sendEdges() {
-    Iterator it = nodes.iterator();
-    while (it.hasNext()) {
-      Node node = (Node) it.next();
-      if (node != null) // skip dummy entry 0
-        System.out.println(" sending data to neighbours of node " + node.UID);
-      node.sendEdges();
-    }
-  }
-
   /*void waitForTermination() {
     while (isStarted())
       synchronized(endButton) {
