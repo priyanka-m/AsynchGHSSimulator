@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
-
+/**
+* @author Shraddha Patel, Priyanka Menghani
+*/
 public class MSTviewer implements Runnable {
   static final int MAX_NODES = 50; // limit on the number of nodes in graph
   boolean started; // true when the algorithm has been started up by user
@@ -28,6 +30,9 @@ public class MSTviewer implements Runnable {
   }
 
   @Override
+  /**
+   * Method to start the algorithm
+   */
   public void run() {
     //while (true) {
     try {
@@ -42,8 +47,8 @@ public class MSTviewer implements Runnable {
     }
     //}
   }
-  /*
-  * Method to initialize nodes 
+  /**
+  * Method to initialize nodes with their IDs
   */
   void acceptRegistration() {
     //System.out.print(nodeCount);
@@ -59,7 +64,9 @@ public class MSTviewer implements Runnable {
     }
     //System.out.print(nodes.size());
   }
-  
+  /**
+  * Method to create link between two nodes
+  */
   void createEdges() {
     // first, create a cycle through the graph to ensure connectedness
     for (int i = 0; i < nodeCount; i++) {
@@ -75,7 +82,9 @@ public class MSTviewer implements Runnable {
 
     }
   }
-
+  /**
+  * Method to start the actual implementation of the algorithm
+  */
   void startAlgorithm() {
     Iterator it = nodes.iterator();
     while (it.hasNext()) {
@@ -85,7 +94,9 @@ public class MSTviewer implements Runnable {
       (new Thread(node)).start();
     }
   }
-
+  /**
+  * Method to terminate the algorithm
+  */
   void closeConnections() {
     Iterator it = nodes.iterator();
     while (it.hasNext()) {
@@ -102,10 +113,12 @@ public class MSTviewer implements Runnable {
       }
     System.out.println("\n SESSION TERMINATED BY USER \n");
   }*/
-
+ /**
+  * Main method to read node count and connectivity matrix
+  * @param args
+  */
   public static void main(String[] args) {
     int[] arrayIds = null;
-
     StreamTokenizer tokenizer = null;
 
     try{

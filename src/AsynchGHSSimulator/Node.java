@@ -5,8 +5,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Created by priyanka on 11/25/14.
- */
+* @author Shraddha Patel, Priyanka Menghani
+*/
 public class Node implements Runnable {
   int UID;
   String name;
