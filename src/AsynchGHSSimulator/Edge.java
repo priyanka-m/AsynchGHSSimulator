@@ -2,10 +2,9 @@ package AsynchGHSSimulator;
 
 import java.util.LinkedList;
 import java.util.Random;
-
 /**
- * Created on 11/25/14.
- */
+* @author Shraddha Patel, Priyanka Menghani
+*/
 public class Edge {
   Node a, b;
   int edgeID;

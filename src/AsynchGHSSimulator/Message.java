@@ -1,8 +1,8 @@
 package AsynchGHSSimulator;
 
 /**
- * Created by priyanka on 11/25/14.
- */
+* @author Shraddha Patel, Priyanka Menghani
+*/
 public final class Message implements java.io.Serializable {
   // Message Type options
   public static final int REGISTRATION = 0;
