@@ -17,7 +17,7 @@ public class Node implements Runnable {
   Node parent = null;
   Node minChild;
   Map<Node, Edge> neighbors; // maps neighboring nodes to edges
-  boolean terminated;
+  boolean terminated = false;
   BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(1000, true);
   BlockingQueue<Message> deferredMsgs = new ArrayBlockingQueue<Message>(1000, true);
   List<Integer> receivedConnectFrom = new ArrayList<Integer>();
@@ -56,9 +56,12 @@ public class Node implements Runnable {
       System.out.println("delivered " + m);
     } catch (Exception e) {
       closeConnection(e);
+
     }
   }
-
+  /*
+  *
+  * */
   void sendEdges() {
     final TreeMap<Integer, Integer> h = new TreeMap<Integer, Integer>();
     Iterator it = neighbors.keySet().iterator();
@@ -91,22 +94,25 @@ public class Node implements Runnable {
     try {
       while (true) {
         Message m = (Message) messageQueue.poll();
+        System.out.println("message of type " + m.messageType + " received");
         if (m != null) {
           switch (m.messageType) {
             case Message.REGISTRATION:
               name = (String) m.data;
               break;
             case Message.WAKEUP:
-              Node minWeightNeighbour = findMinWeightNeighbour();
-              if (!sentConnectTo.contains(minWeightNeighbour.UID)) {
-                System.out.println("sent connect to of " + UID + " contains " + minWeightNeighbour.UID + " sending connect from " + UID + " to " + minWeightNeighbour + " core " + core + " level " + level);
-                neighbors.get(minWeightNeighbour).forwardMessage(this, minWeightNeighbour, new Message(Message.CONNECT, UID, minWeightNeighbour.UID, core, level));
-              }
+              Initiate(UID, core, level);
+//              Node minWeightNeighbour = findMinWeightNeighbour();
+//              if (!sentConnectTo.contains(minWeightNeighbour.UID)) {
+//                System.out.println("sent connect to of " + UID + " contains " + minWeightNeighbour.UID + " sending connect from " + UID + " to " + minWeightNeighbour + " core " + core + " level " + level);
+//                neighbors.get(minWeightNeighbour).forwardMessage(this, minWeightNeighbour, new Message(Message.CONNECT, UID, minWeightNeighbour.UID, core, level));
+//              }
               break;
             case Message.INITIATE:
               Initiate(m.sender, m.core, m.level);
               break;
             case Message.TEST:
+              System.out.print("Test received");
               Test(m);
               break;
             case Message.ACCEPT:
@@ -165,9 +171,10 @@ public class Node implements Runnable {
     int minCost = 100000;
     Edge minCostEdge = null;
     for (Edge e : basicEdges) {
-      if (e.cost < minCost)
+      if (e.cost < minCost) {
         minCost = e.cost;
-      minCostEdge = e;
+        minCostEdge = e;
+      }
     }
     return minCostEdge;
   }
@@ -197,30 +204,37 @@ public class Node implements Runnable {
     Edge lowestCostBasicEdge = findLowestCostBasicEdge();
     while (!basicEdges.isEmpty() && (mwoe == 100000  || mwoe > lowestCostBasicEdge.cost)) {
       Node neighbour = findNodeIncidentOnEdge(lowestCostBasicEdge);
+      System.out.println(UID + " My lowest cost basic edge is to " + neighbour.UID);
       lowestCostBasicEdge.forwardMessage(this, neighbour, new Message(Message.TEST, this.UID, neighbour.UID, this.core, this.level));
       //wait for a response for the test message.
       while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {}
     }
 
-    while (true) {
-      if (waitingForReport.isEmpty()) {
-        if (parent != this) {
-          status = "FOUND";
-          parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
-        } else if (mwoe != 100000) {
-          sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
-        } else {
-          for (Edge branchEdge : branchEdges) {
-            Node n = findNodeIncidentOnEdge(branchEdge);
-            branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
+    try {
+      while (true) {
+        if (waitingForReport.isEmpty()) {
+          if (parent != this) {
+            status = "FOUND";
+            parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
+          } else if (mwoe != 100000) {
+            sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
+          } else {
+            for (Edge branchEdge : branchEdges) {
+              Node n = findNodeIncidentOnEdge(branchEdge);
+              branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
+            }
+            closeConnection("Thread " + UID + " Terminated");
           }
+          break;
         }
-        break;
       }
+    } catch (Exception e) {
+      closeConnection(e);
     }
   }
 
   void Test(Message m) {
+    System.out.println("Test called for " + UID);
     if (this.core == m.core) {// in the same fragment
       System.out.println(" in the same fragment ");
       neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.REJECT, UID, m.sender));
@@ -228,8 +242,10 @@ public class Node implements Runnable {
     } else if (this.level >= m.level) {// can't be in the same fragment
       neighbors.get(MSTviewer.nodes.get(m.sender)).forwardMessage(this, MSTviewer.nodes.get(m.sender), new Message(Message.ACCEPT, UID, m.sender));
       System.out.println(" not in the same fragment ");
-    } else // don't know yet because we haven't reached that level
-      deferredMsgs.add(m);
+    } else { // don't know yet because we haven't reached that level
+        System.out.print("Adding to deferred messages");
+        deferredMsgs.add(m);
+      }
   }
 
   void Accept(int sender) {
@@ -308,6 +324,7 @@ public class Node implements Runnable {
       if (neighbour != null && neighbour != MSTviewer.nodes.get(sender))
           e.forwardMessage(this, neighbour, new Message(Message.ALL_DONE, UID, neighbour.UID));
     }
+    closeConnection("Thread " + UID + " Terminated");
   }
 
   void processDeferredTests() {
