@@ -234,12 +234,14 @@ public class Node implements Runnable {
 
   void Accept(int sender) {
     if (neighbors.get(MSTviewer.nodes.get(sender)).getCost() < mwoe) {
+      System.out.println("In accept()");
       minChild = null;
       mwoe = neighbors.get(MSTviewer.nodes.get(sender)).getCost();
     }
   }
 
   void Reject(int sender) {
+      System.out.println("In reject()");
     receivedRejectFrom.add(sender);
     rejectedEdges.add(neighbors.get(MSTviewer.nodes.get(sender)));
     basicEdges.remove(neighbors.get(MSTviewer.nodes.get(sender)));

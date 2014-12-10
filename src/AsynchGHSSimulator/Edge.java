@@ -80,7 +80,7 @@ public class Edge {
       public void run() { // animation from src to dest, then delivery
         if (getDelay() > 0) {
           try {
-            Thread.sleep(getDelay()*20*priorCount);
+            Thread.sleep(getDelay()*1000);
           } catch (InterruptedException ie) {}
         }
         Message toDeliver;
