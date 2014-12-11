@@ -54,6 +54,21 @@ public class Node implements Runnable {
     try {
       messageQueue.add(m);
       System.out.println("delivered " + m);
+      if (m.messageType == 4) {
+        synchronized (receivedAcceptFrom) {
+          receivedAcceptFrom.add(m.sender);
+          notify();
+        }
+      } else if (m.messageType == 5) {
+        synchronized (receivedRejectFrom) {
+          receivedRejectFrom.add(m.sender);
+          notify();
+        }
+      }
+      System.out.println("printing message ..queue ");
+      for(Message me : messageQueue) {
+        System.out.print(me.sender + " type " + me.messageType + " .. ");
+      }
     } catch (Exception e) {
       closeConnection(e);
 
@@ -93,9 +108,10 @@ public class Node implements Runnable {
   void receiveMessages() {
     try {
       while (true) {
+        //System.out.println(" i am running ");
         Message m = (Message) messageQueue.poll();
-        System.out.println("message of type " + m.messageType + " received");
         if (m != null) {
+          System.out.println("message of type " + m.messageType + " received");
           switch (m.messageType) {
             case Message.REGISTRATION:
               name = (String) m.data;
@@ -160,7 +176,6 @@ public class Node implements Runnable {
   Node findNodeIncidentOnEdge(Edge incidentEdge) {
     for (Node n : neighbors.keySet()) {
       if (neighbors.get(n).equals(incidentEdge)) {
-        System.out.println("node found with id " + n.UID);
         return n;
       }
     }
@@ -203,14 +218,26 @@ public class Node implements Runnable {
     mwoe = 100000;
     Edge lowestCostBasicEdge = findLowestCostBasicEdge();
     while (!basicEdges.isEmpty() && (mwoe == 100000  || mwoe > lowestCostBasicEdge.cost)) {
-      Node neighbour = findNodeIncidentOnEdge(lowestCostBasicEdge);
-      System.out.println(UID + " My lowest cost basic edge is to " + neighbour.UID);
+      final Node neighbour = findNodeIncidentOnEdge(lowestCostBasicEdge);
       lowestCostBasicEdge.forwardMessage(this, neighbour, new Message(Message.TEST, this.UID, neighbour.UID, this.core, this.level));
       //wait for a response for the test message.
-      while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {}
+      synchronized (this) {
+        while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {
+          try{
+            wait();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+      if (receivedAcceptFrom.contains(neighbour.UID)) {
+        break;
+      } else if (receivedRejectFrom.contains(neighbour.UID)) {
+        continue;
+      }
     }
 
-    try {
+    /*try {
       while (true) {
         if (waitingForReport.isEmpty()) {
           if (parent != this) {
@@ -230,7 +257,7 @@ public class Node implements Runnable {
       }
     } catch (Exception e) {
       closeConnection(e);
-    }
+    }*/
   }
 
   void Test(Message m) {
@@ -258,7 +285,6 @@ public class Node implements Runnable {
 
   void Reject(int sender) {
       System.out.println("In reject()");
-    receivedRejectFrom.add(sender);
     rejectedEdges.add(neighbors.get(MSTviewer.nodes.get(sender)));
     basicEdges.remove(neighbors.get(MSTviewer.nodes.get(sender)));
   }

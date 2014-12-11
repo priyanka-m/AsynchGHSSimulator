@@ -26,7 +26,6 @@ public class MSTviewer implements Runnable {
   }
 
   public MSTviewer() {
-    //setStarted(true);
   }
 
   @Override
@@ -34,45 +33,37 @@ public class MSTviewer implements Runnable {
    * Method to start the algorithm
    */
   public void run() {
-    //while (true) {
     try {
       acceptRegistration();
       createEdges();
       startAlgorithm();
-      //sendEdges();
-      //waitForTermination();
     } catch (Exception e) {
-      System.out.println(" stopped ");
       e.printStackTrace();
     }
-    //}
   }
   /**
   * Method to initialize nodes with their IDs
   */
   void acceptRegistration() {
-    //System.out.print(nodeCount);
     for (int i = 0; i < nodeCount; i++) {
       if ((nodes.size() < MAX_NODES + 1 || nodes.size() <= 3) && !isStarted()) {
         try {
           nodes.add(new Node(nodes.size()));
-          //System.out.print(nodes.size());
         } catch (Exception e) {
           System.out.println(e);
         }
       }
     }
-    //System.out.print(nodes.size());
   }
   /**
   * Method to create link between two nodes
   */
   void createEdges() {
-    // first, create a cycle through the graph to ensure connectedness
+    // first, create a cycle through the graph to ensure it is connected
     for (int i = 0; i < nodeCount; i++) {
       for (int j = 0; j < nodeCount; j++) {
-        if (connections[i][j] == 1) {
-          new Edge(nodes.get(i), nodes.get(j));
+        if (connections[i][j] > 0) {
+          new Edge(nodes.get(i), nodes.get(j), connections[i][j]);
           // To avoid creation of another edge from j to i. We can alter the array connections because
           // we don't need it anymore.
           connections[i][j] = 0;
@@ -106,13 +97,6 @@ public class MSTviewer implements Runnable {
       }
     }
   }
-  /*void waitForTermination() {
-    while (isStarted())
-      synchronized(endButton) {
-        try {endButton.wait();} catch (InterruptedException ie) {}
-      }
-    System.out.println("\n SESSION TERMINATED BY USER \n");
-  }*/
  /**
   * Main method to read node count and connectivity matrix
   * @param args

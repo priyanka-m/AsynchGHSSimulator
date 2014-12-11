@@ -15,11 +15,11 @@ public class Edge {
   LinkedList aQueue, bQueue;
   boolean isRejected;
   
-  Edge(Node a, Node b) {
+  Edge(Node a, Node b, int weight) {
     edgeID = MSTviewer.edgeCount++;
     this.a = a;
     this.b = b;
-    this.cost = a.UID + b.UID;
+    this.cost = weight;
     a.getNeighbors().put(b,this);
     b.getNeighbors().put(a,this);
     a.basicEdges.add(this);
@@ -30,14 +30,12 @@ public class Edge {
     isRejected = false;
   }
 
-  public int getCost() { // use Euclidian distance, with unique low order bits
+  public int getCost() {
     return this.a.UID + this.b.UID;
   }
 
   // Messages sent over an edge are forwarded to their destinations
-  void forwardMessage(final Node src,
-                      final Node dest,
-                      final Message m) {
+  void forwardMessage(final Node src, final Node dest, final Message m) {
     if (!((src == a && dest == b) ||
         (src == b && dest == a)))
       throw new IllegalArgumentException("message " + m +
@@ -63,7 +61,6 @@ public class Edge {
         }
         break;
       case Message.CONNECT:
-        //this.isBranch = true;
         break;
       case Message.INITIATE:
         break;
@@ -76,10 +73,10 @@ public class Edge {
 
     }
     (new Thread() {
-      public void run() { // animation from src to dest, then delivery
+      public void run() {
         if (getDelay() > 0) {
           try {
-            Thread.sleep(getDelay()*1000);
+            Thread.sleep(getDelay()*1000*priorCount);
           } catch (InterruptedException ie) {}
         }
         Message toDeliver;
@@ -87,7 +84,6 @@ public class Edge {
           toDeliver = (Message)  messageQueue.removeFirst(); //dequeue
         }
         dest.sendMessage(toDeliver); // message is delivered here
-    //    inTransit--;
       }
     }).start();
   }
