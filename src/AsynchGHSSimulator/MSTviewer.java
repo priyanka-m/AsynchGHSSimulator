@@ -77,6 +77,7 @@ public class MSTviewer implements Runnable {
   * Method to start the actual implementation of the algorithm
   */
   void startAlgorithm() {
+    System.out.println("Starting the algorithm, 100 represents the main thread");
     Iterator it = nodes.iterator();
     while (it.hasNext()) {
       Node node = (Node) it.next();

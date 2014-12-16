@@ -17,17 +17,8 @@ public final class Message implements java.io.Serializable {
   public static final int INFORM = 9;
   public static final int ALL_DONE = 10;
 
-  public static final String[] messageNames = {"registration",
-      "wakeup",
-      "initiate",
-      "test",
-      "accept",
-      "reject",
-      "report",
-      "changeRoot",
-      "connect",
-      "inform",
-      "allDone"};
+  public static final String[] messageNames = {"registration", "wakeup",
+      "initiate", "test", "accept", "reject", "report", "changeRoot", "connect", "inform", "allDone"};
 
 
   public int messageType; //one of the above constants
@@ -36,14 +27,6 @@ public final class Message implements java.io.Serializable {
   public int core;        //Node ID of sender's fragment core (not always used)
   public int level;       //Node ID of sender's level (not always used)
   public int cost;        //MWOE cost in sender's subtree (not always used)
-  public Object data; // used in registration messages
-
-  // Sending a copy of edges to all nodes
-  public Message(int destination, Object Data) {
-    messageType = REGISTRATION;
-    this.destination = destination;
-    this.data = Data;
-  }
 
   // Constructor for Initiate, Test, Connect, and Inform messages:
   public Message(int messageType, int sender, int destination,
@@ -61,13 +44,7 @@ public final class Message implements java.io.Serializable {
     this(messageType, sender, destination, 0, 0, 0);
   }
 
-  // You probably won't need this constructor:
-  public Message(int messageType,
-                 int sender,
-                 int destination,
-                 int core,
-                 int level,
-                 int cost) {
+  public Message(int messageType, int sender, int destination, int core, int level, int cost) {
     if (messageType < 0 || messageType > 10)
       throw new IllegalArgumentException("Bad message type: " + messageType);
     this.messageType = messageType;
@@ -92,8 +69,6 @@ public final class Message implements java.io.Serializable {
       case CONNECT:
       case INFORM:
         result += core + "," + level; break;
-      case REGISTRATION:
-        result += data;
     }
     result += ")";
     return result;

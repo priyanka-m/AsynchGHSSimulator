@@ -89,7 +89,7 @@ public class Edge {
   }
 
   public int getDelay() {
-    int randomInt = new Random().nextInt(100);
+    int randomInt = new Random().nextInt(20);
     return randomInt;
   }
 
