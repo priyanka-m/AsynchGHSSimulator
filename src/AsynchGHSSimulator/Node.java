@@ -59,9 +59,8 @@ public class Node implements Runnable {
       System.out.println("delivered " + m);
       if (m.messageType == 4) {
         synchronized (receivedAcceptFrom) {
-          System.out.println("accept and notify");
           receivedAcceptFrom.add(m.sender);
-          notifyAll();
+          notify();
         }
       } else if (m.messageType == 5) {
         synchronized (receivedRejectFrom) {
@@ -128,7 +127,6 @@ public class Node implements Runnable {
                 if (sentConnectTo.contains(m.sender) && receivedConnectFrom.contains(m.sender)) {
                   connect(m.sender, m.destination, m.core, m.level);
                 } else {
-                  System.out.println("Adding to deferred messages");
                   deferredMsgs.add(m);
                 }
               } else {
@@ -189,7 +187,7 @@ public class Node implements Runnable {
   * @param core core of the component
   * @param level level of the component
   */
-  void Initiate(int sender, final int core, final int level) {
+  void Initiate(int sender, int core, int level) {
     status = "SEARCHING";
     this.core = core;
     this.level = level;
@@ -209,56 +207,46 @@ public class Node implements Runnable {
     }
 
     mwoe = 100000;
-    final Edge lowestCostBasicEdge = findLowestCostBasicEdge();
-    final Node thisNode = this;
-    if (!basicEdges.isEmpty() && (mwoe == 100000  || mwoe > lowestCostBasicEdge.cost)) {
+    Edge lowestCostBasicEdge = findLowestCostBasicEdge();
+    while (!basicEdges.isEmpty() && (mwoe == 100000  || mwoe > lowestCostBasicEdge.cost)) {
       final Node neighbour = findNodeIncidentOnEdge(lowestCostBasicEdge);
-      lowestCostBasicEdge.forwardMessage(thisNode, neighbour, new Message(Message.TEST, UID, neighbour.UID, core, level));
+      lowestCostBasicEdge.forwardMessage(this, neighbour, new Message(Message.TEST, this.UID, neighbour.UID, this.core, this.level));
+      //wait for a response for the test message.
+      synchronized (this) {
+        while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {
+          try{
+            wait();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+      if (receivedAcceptFrom.contains(neighbour.UID)) {
+        break;
+      } else if (receivedRejectFrom.contains(neighbour.UID)) {
+        continue;
+      }
     }
-//    (new Thread() {
-//      public void run() {
-//
-//          //wait for a response for the test message.
-//          //synchronized (this) {
-//            while (!receivedAcceptFrom.contains(neighbour.UID) || !receivedRejectFrom.contains(neighbour.UID)) {
-//              //try{
-//                //wait();
-//              //} catch (Exception e) {
-//                //e.printStackTrace();
-//              //}
-//            }
-//          //}
-//          System.out.println("notified");
-//          if (receivedAcceptFrom.contains(neighbour.UID)) {
-//            System.out.println("Received accept from " + neighbour.UID);
-//            break;
-//          } else if (receivedRejectFrom.contains(neighbour.UID)) {
-//            continue;
-//          }
-//        }
-//        try {
-//          if (waitingForReport == null || waitingForReport.isEmpty()) {
-//            System.out.println("waiting for report is now empty");
-//            if (parent != thisNode) {
-//              status = "FOUND";
-//              parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
-//            } else if (mwoe != 100000) {
-//              sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
-//            } else {
-//              for (Edge branchEdge : branchEdges) {
-//                Node n = findNodeIncidentOnEdge(branchEdge);
-//                branchEdge.forwardMessage(thisNode, n, new Message(Message.ALL_DONE, UID, n.UID));
-//              }
-//              closeConnection("Thread " + UID + " Terminated");
-//            }
-//          }
-//
-//        } catch (Exception e) {
-//          closeConnection(e);
-//        }
-//      }
-//    }).start();
 
+    try {
+      if (waitingForReport.isEmpty()) {
+        if (parent != this) {
+          status = "FOUND";
+          parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
+        } else if (mwoe != 100000) {
+          sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
+        } else {
+          for (Edge branchEdge : branchEdges) {
+            Node n = findNodeIncidentOnEdge(branchEdge);
+            branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
+          }
+          closeConnection("Thread " + UID + " Terminated");
+        }
+      }
+
+    } catch (Exception e) {
+      closeConnection(e);
+    }
   }
 
   /**
@@ -277,23 +265,6 @@ public class Node implements Runnable {
       }
   }
 
-  void checkStatus() {
-    if (waitingForReport == null || waitingForReport.isEmpty()) {
-      System.out.println("waiting for report is now empty");
-      if (parent != this) {
-        status = "FOUND";
-        parent.sendMessage(new Message(Message.REPORT, UID, parent.UID, mwoe));// this will be the minimum in subtree
-      } else if (mwoe != 100000) {
-        sendMessage(new Message(Message.CHANGE_ROOT, UID, UID));
-      } else {
-        for (Edge branchEdge : branchEdges) {
-          Node n = findNodeIncidentOnEdge(branchEdge);
-          branchEdge.forwardMessage(this, n, new Message(Message.ALL_DONE, UID, n.UID));
-        }
-        closeConnection("Thread " + UID + " Terminated");
-      }
-    }
-  }
   /**
    * Method to give response to a Test message indicating a different fragment
    * @param sender
@@ -302,18 +273,9 @@ public class Node implements Runnable {
     if (neighbors.get(MSTviewer.nodes.get(sender)).getCost() < mwoe) {
       minChild = null;
       mwoe = neighbors.get(MSTviewer.nodes.get(sender)).getCost();
-      checkStatus();
     }
   }
 
-  void resendTest() {
-    final Edge lowestCostBasicEdge = findLowestCostBasicEdge();
-    final Node thisNode = this;
-    if (!basicEdges.isEmpty() && (mwoe == 100000  || mwoe > lowestCostBasicEdge.cost)) {
-      final Node neighbour = findNodeIncidentOnEdge(lowestCostBasicEdge);
-      lowestCostBasicEdge.forwardMessage(thisNode, neighbour, new Message(Message.TEST, UID, neighbour.UID, core, level));
-    }
-  }
   /**
    * Method to give response to a Test message indicating the same fragment
    * @param sender UID of the node that sent the message
@@ -321,7 +283,6 @@ public class Node implements Runnable {
   void Reject(int sender) {
     rejectedEdges.add(neighbors.get(MSTviewer.nodes.get(sender)));
     basicEdges.remove(neighbors.get(MSTviewer.nodes.get(sender)));
-    resendTest();
   }
 
   /**
@@ -335,7 +296,6 @@ public class Node implements Runnable {
       minChild = MSTviewer.nodes.get(sender);
       mwoe = cost;
     }
-    checkStatus();
   }
 
 
@@ -447,7 +407,7 @@ public class Node implements Runnable {
 
   void closeConnection(Object reason) {
     if (!terminated) { // print only if not terminated yet
-      System.out.println("Closing thread " + UID + " due to: " + reason);
+      System.out.println("Closing therad " + UID + " due to: " + reason);
       if (reason instanceof Exception)
         ((Exception) reason).printStackTrace();
     }

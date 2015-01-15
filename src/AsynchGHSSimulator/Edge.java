@@ -6,20 +6,24 @@ import java.util.Random;
 * @author Shraddha Patel, Priyanka Menghani
 */
 public class Edge {
-  Node a, b;
-  int edgeID;
-  int cost;
+  Node a, b;        //two nodes connected by an edge
+  int edgeID;       //Edge ID
+  int cost;         //cost of edge
   int inTransit;
   boolean isBranch;
   String type;
-  LinkedList aQueue, bQueue;
+  LinkedList aQueue, bQueue;//two queues for connected nodes 
   boolean isRejected;
-  
-  Edge(Node a, Node b, int weight) {
+  /**
+   * Constructor to initialize an edge
+   * @param Node a
+   * @param Node b 
+   */
+  Edge(Node a, Node b) {
     edgeID = MSTviewer.edgeCount++;
     this.a = a;
     this.b = b;
-    this.cost = weight;
+    this.cost = a.UID + b.UID;
     a.getNeighbors().put(b,this);
     b.getNeighbors().put(a,this);
     a.basicEdges.add(this);
@@ -29,13 +33,21 @@ public class Edge {
     isBranch = false;
     isRejected = false;
   }
-
-  public int getCost() {
+/**
+ * Method to get edge weight
+ * @return 
+ */
+  public int getCost() { // use Euclidian distance, with unique low order bits
     return this.a.UID + this.b.UID;
   }
 
-  // Messages sent over an edge are forwarded to their destinations
-  void forwardMessage(final Node src, final Node dest, final Message m) {
+  /**
+   * Messages sent over an edge are forwarded to their destinations
+   */ 
+   
+  void forwardMessage(final Node src,
+                      final Node dest,
+                      final Message m) {
     if (!((src == a && dest == b) ||
         (src == b && dest == a)))
       throw new IllegalArgumentException("message " + m +
@@ -61,6 +73,7 @@ public class Edge {
         }
         break;
       case Message.CONNECT:
+        //this.isBranch = true;
         break;
       case Message.INITIATE:
         break;
@@ -73,10 +86,10 @@ public class Edge {
 
     }
     (new Thread() {
-      public void run() {
+      public void run() { // animation from src to dest, then delivery
         if (getDelay() > 0) {
           try {
-            Thread.sleep(getDelay()*1000*priorCount);
+            Thread.sleep(getDelay()*1000);
           } catch (InterruptedException ie) {}
         }
         Message toDeliver;
@@ -84,10 +97,14 @@ public class Edge {
           toDeliver = (Message)  messageQueue.removeFirst(); //dequeue
         }
         dest.sendMessage(toDeliver); // message is delivered here
+    //    inTransit--;
       }
     }).start();
   }
-
+/**
+ * Method to simulate an asynchronous system
+ * @return 
+ */
   public int getDelay() {
     int randomInt = new Random().nextInt(20);
     return randomInt;
